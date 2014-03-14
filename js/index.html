@@ -1,0 +1,55 @@
+<html>
+
+<head>
+	<title> AUD.js Generator</title>
+
+    <script type="text/javascript" src="jquery.min.js"></script>
+	<script type="text/javascript" src="Blob.js"> </script>
+	<script type="text/javascript" src="FileSaver.js"> </script>
+    <script type="text/javascript" src="aud.js"></script>
+    <script type="text/javascript" src="aud_ui.js"></script>
+	<link rel="stylesheet" type="text/css" href="style.css" />
+	
+</head>
+
+<body>
+	<div class="wrapper">
+		<div class="other">
+			<canvas width="1200px" height="400px" id="canvas"></canvas>		
+		</div>
+		<br></br>
+		<div class="bar">
+			<canvas width="200", height="200" id="emote_canvas" ></canvas>
+		</div>
+		<div class="bar">
+			Stress
+			<textarea rows="1" colums="60" onchange="updateStress();" oninput="updateStress();" id="stress">0.5</textarea>
+			Energy
+			<textarea rows="1" colums="60" onchange="updateEnergy();" oninput="updateEnergy();" id="energy">0.5</textarea>
+			Seed-Value
+			<textarea rows="1" colums="60" onchange="updateSeed();" oninput="updateSeed();" id="seed">0</textarea>
+		</div>
+		<div class="bar">
+			Number of Patterns
+			<textarea rows="1" colums="60" onchange="updatePat();" oninput="updatePat();" id="pat">1</textarea>
+			Repeats of Patterns
+			<textarea rows="1" colums="60" onchange="updatePatlen();" oninput="updatePatlen();" id="patlen">1</textarea>
+			
+			<button onclick = "generate();">Generate pattern</button>
+			<button onclick = "adapt();">Adapt pattern</button>
+		</div>
+		<div class="bar">	
+
+			<button onclick ="savePiece();">Save as a .wav file</button>	
+			<textarea id="log" rows="5" columns="60" id="log">AUD.js information will appear here</textarea>
+			<br />
+			
+			<button onclick ="playstop();">Play/Stop</button>
+			<button onclick ="resumepause();">Pause/Resume</button>	
+		</div>
+		
+	</div>
+</body>
+
+</html>
+
