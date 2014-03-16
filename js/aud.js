@@ -1085,12 +1085,12 @@ var aud = new function()
 		var c = self.pattern.length + 2;
 		var d = self.pattern.length + 3;		
 		
-		var v = 0.5 - 0.1 * energy - 0.1 * stress;
-		var tempinstr = new aud_instrument(80000, 0.95 - stress * 0.3 - energy * 0.3, self.random, false, 80000, 0);
+		var v = 0.4 - 0.05 * energy - 0.05 * stress;
+		var tempinstr = new aud_instrument(80000, 0.75 - stress * 0.2 - energy * 0.2, self.random, false, 80000, 0);
 		self.pattern.push(new aud_track(tempinstr));
-		self.pattern.push(new aud_track(new aud_instrument(40000, 0.95 - stress * 0.7, self.random, false, 40000, tempinstr)));
-		self.pattern.push(new aud_track(new aud_instrument(20000, 0.95 - stress * 0.7, self.random, false, 20000, tempinstr)));
-		self.pattern.push(new aud_track(new aud_instrument(10000, 0.95 - stress * 0.7, self.random, false, 10000, tempinstr)));
+		self.pattern.push(new aud_track(new aud_instrument(40000, 0.95, self.random, false, 40000, tempinstr)));
+		self.pattern.push(new aud_track(new aud_instrument(20000, 0.95, self.random, false, 20000, tempinstr)));
+		self.pattern.push(new aud_track(new aud_instrument(10000, 0.95, self.random, false, 10000, tempinstr)));
 		self.pattern[a].instrument.volume = v;
 		self.pattern[b].instrument.volume = v;
 		self.pattern[c].instrument.volume = v;
