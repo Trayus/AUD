@@ -81,7 +81,7 @@ public class AUD_tester extends JFrame
          this.aud = aud;
       }
       public void actionPerformed(ActionEvent e) {
-         aud.togglePlay();
+         aud.togglePause();
       }
    }
    private class ResetButtonListener implements ActionListener
@@ -163,11 +163,11 @@ public class AUD_tester extends JFrame
       
       this.add(c);
       
-      
+      /*
       JButton save = new JButton("Save as .midi");
       //save.addActionListener(new ResetButtonListener(aud));
       this.add(save);
-      
+      */   
       pack();
       this.setVisible(true);
       this.setDefaultCloseOperation(EXIT_ON_CLOSE);

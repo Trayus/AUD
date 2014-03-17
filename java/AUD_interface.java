@@ -9,6 +9,7 @@ public class AUD_interface extends Thread
    public int tempo = 150; 
    private MidiChannel[] channels;
    public static final int NUMTRACKS = 16;
+   public static final int NUMPERC = 3; 
 
    public void run()
    {
@@ -18,14 +19,16 @@ public class AUD_interface extends Thread
           synthesizer.open();
           
           // 20, 2, (4, 17, 27 for high notes), 6, 105, 108, 19, 16, 25, 28!, 32, 33, 34!, 35, 36!, 37, 28
-                    
-          int num = 2;
+
+          //int num = 2;
           
           channels = synthesizer.getChannels();
-          channels[0].programChange(num);
-          channels[1].programChange(num);
-          channels[2].programChange(num);
-          channels[3].programChange(num);
+          channels[0].programChange(36); 
+          channels[1].programChange(28); 
+          channels[2].programChange(34); 
+          channels[3].programChange(27);  
+          channels[9].programChange(24);
+          
           while (this.active)
           {
              if (this.paused)
@@ -42,6 +45,7 @@ public class AUD_interface extends Thread
                 stopAt(ndx, channels[1]);
                 stopAt(ndx, channels[2]);
                 stopAt(ndx, channels[3]);
+                stopAt(ndx, channels[9]);
                 
                 ndx++;
                 if (ndx >= pattern[0].length)
@@ -80,6 +84,12 @@ public class AUD_interface extends Thread
                channels[i / 4].noteOn(this.pattern[i][ndx - ndx % 1].note_num, this.pattern[i][ndx - ndx % 1].vel); break;
          }
       } 
+      if (this.pattern[NUMTRACKS][ndx].note_num > 0)
+         channels[9].noteOn(this.pattern[NUMTRACKS][ndx].note_num, this.pattern[NUMTRACKS][ndx].vel);
+      if (this.pattern[NUMTRACKS + 1][ndx - ndx % 2].note_num > 0 && ndx % 2 == 0)
+         channels[9].noteOn(this.pattern[NUMTRACKS + 1][ndx - ndx % 2].note_num, this.pattern[NUMTRACKS + 1][ndx - ndx % 2].vel);
+      if (this.pattern[NUMTRACKS + 2][ndx].note_num > 0)
+         channels[9].noteOn(this.pattern[NUMTRACKS + 2][ndx].note_num, this.pattern[NUMTRACKS + 2][ndx].vel);
    }
    private void stopAt(int ndx, MidiChannel channel)
    {
@@ -97,5 +107,12 @@ public class AUD_interface extends Thread
                channel.noteOn(this.pattern[i][ndx - ndx % 1].note_num, 0); break;
          }
       } 
+      if (this.pattern[NUMTRACKS][ndx].note_num > 0)
+         channels[9].noteOn(this.pattern[NUMTRACKS][ndx].note_num, 0);
+      if (this.pattern[NUMTRACKS + 1][ndx - ndx % 2].note_num > 0 && ndx % 2 == 1)
+         channels[9].noteOn(this.pattern[NUMTRACKS + 1][ndx - ndx % 2].note_num, 0);
+      if (this.pattern[NUMTRACKS + 2][ndx].note_num > 0)
+         channels[9].noteOn(this.pattern[NUMTRACKS + 2][ndx].note_num, 0);
+      
    }
 }

@@ -44,8 +44,8 @@ public class AUD
 		}
 
       // declare and clear new pattern	
-		AUD_note pattern[][] = new AUD_note[AUD_interface.NUMTRACKS][32 * aud_pat * aud_patlen];
-      for (int i = 0; i < AUD_interface.NUMTRACKS; i++)
+		AUD_note pattern[][] = new AUD_note[AUD_interface.NUMTRACKS + AUD_interface.NUMPERC][32 * aud_pat * aud_patlen];
+      for (int i = 0; i < AUD_interface.NUMTRACKS + AUD_interface.NUMPERC; i++)
          for (int j = 0; j < 32 * aud_pat * aud_patlen; j++)
             pattern[i][j] = new AUD_note(-1,0);
       
@@ -56,12 +56,12 @@ public class AUD
 		boolean transitions[] = new boolean[aud_pat];
 		interf.tempo = (int)(150 * (0.9 + rand.nextDouble() * 0.9));
 				
-      // pick instrumentation
+      // pick instrumentation - commented out temporarily? 
       int lowInstrs[] = new int[] { 20, 2, 6, 105, 108, 19, 16, 25, 28, 28, 32, 33, 34, 34, 35, 36, 36, 37, 28};
       int highInstrs[] = new int[] { 20, 2, 6, 105, 108, 19, 16, 25, 28, 28, 32, 33, 34, 34, 35, 36, 36, 37, 28, 4, 17, 27};
       
-      interf.setInstrs(lowInstrs[rand.nextInt(lowInstrs.length)], lowInstrs[rand.nextInt(lowInstrs.length)],
-                       highInstrs[rand.nextInt(highInstrs.length)], highInstrs[rand.nextInt(highInstrs.length)]);
+      //interf.setInstrs(lowInstrs[rand.nextInt(lowInstrs.length)], lowInstrs[rand.nextInt(lowInstrs.length)],
+      //                 highInstrs[rand.nextInt(highInstrs.length)], highInstrs[rand.nextInt(highInstrs.length)]);
       
 		for (int i = 0; i < aud_pat; i++)
 		{
@@ -104,8 +104,11 @@ public class AUD
 		rand = new Random(aud_seed);
 		for (int temp = 0; temp < 80; temp++) rand.nextDouble(); // so the two melodic tracks aren't identical
 		n_tracks = (int)Math.floor(2 + energy * n_eng + rand.nextDouble() * n_ran);
-		populate_melody(pattern, stress, energy, aud_pat, aud_patlen, transitions, Jmap, Pmap, base_note + 24, 3, instr_arr, n_tracks, fwd_arr);
+		populate_melody(pattern, stress, energy, aud_pat, aud_patlen, transitions, Jmap, Pmap, base_note + 19, 3, instr_arr, n_tracks, fwd_arr);
 		
+      rand = new Random(aud_seed);
+		for (int temp = 0; temp < 60; temp++) rand.nextDouble(); // so the two melodic tracks aren't identical
+		populate_perc(pattern, stress, energy, aud_pat, aud_patlen, transitions);
       
       // copy - need transition?
       interf.pattern = pattern;
@@ -119,7 +122,8 @@ public class AUD
    
    public void togglePlay()
    {
-      interf.paused = false;
+      if (has_gen)
+         interf.paused = false;
    }
    
    public void togglePause()
@@ -332,7 +336,7 @@ public class AUD
 			
 			for (int j = 0; j < avail.size(); j++)
 			{
-				if (!canUse(Jmap, avail.get(j), curnote, cutoff))
+            if (!canUse(Jmap, avail.get(j), curnote, cutoff))
 				{
 					avail.remove(j);
 					j--;
@@ -780,6 +784,138 @@ public class AUD
 			// consume more random numbers to compensate for # over repeats - consume numbers equivalent to 8 repeats 
 			for (int tmp = 0; tmp < (8 - patlen) * 32 * 8 ; tmp++) 
 				rand.nextDouble();
+		}
+	}
+   
+   void populate_perc(AUD_note[][] pattern, double stress, double energy, int pat, int patlen, boolean[] transitions)
+	{	
+      // 35, 36, 38, 41, (42), 43, (44), (46) 
+      int hittype3 = 35;
+      int hittype1 = 43;
+      int hittype2 = 46;
+      int ndx0 = AUD_interface.NUMTRACKS;
+      int ndx1 = AUD_interface.NUMTRACKS + 1;
+      int ndx2 = AUD_interface.NUMTRACKS + 2;
+   
+		for (int p = 0; p < pat; p++)
+		{		
+			for (int pl = 0; pl < patlen; pl++)
+			{
+				int pat_pos = p * patlen * 32 + pl * 32;
+				if (pl == 0)
+				{
+					for (int i = 0; i < 32; i++)
+					{
+						double tenergy = energy;
+						if (patlen == 1 && i > 32 - 8)
+						{
+							if (transitions[p])
+								tenergy = energy * energy * energy;
+							else 
+								tenergy = Math.sqrt(Math.sqrt(energy));
+						}
+					
+						double r1 = rand.nextDouble();
+						double r2 = rand.nextDouble();
+						double r3 = rand.nextDouble();
+						
+						if (i % 8 == 0) 
+						{
+							if (r3 > 0.02)
+								pattern[ndx2][pat_pos + i].note_num = hittype3;
+							if (r1 > 0.9)
+								pattern[ndx0][pat_pos + i].note_num = hittype1;
+							if (r2 - tenergy / 4 > 0.7)
+								pattern[ndx1][pat_pos + i].note_num = hittype2;
+						}
+						else if (i % 4 == 0)
+						{
+							if (r1 > 0.1 && tenergy + r1 > 0.6)
+								pattern[ndx0][pat_pos + i].note_num = hittype1;
+							if (r2 - tenergy / 4 > 0.5)
+								pattern[ndx1][pat_pos + i].note_num = hittype2;
+						}
+						else if (i % 2 == 0)
+						{
+							if (tenergy + r1 > 0.9)
+								pattern[ndx0][pat_pos + i].note_num = hittype1;
+						}
+						else
+						{
+							if (r1 > 0.75 && tenergy > 0.75)
+								pattern[ndx0][pat_pos + i].note_num = hittype1;
+						}
+					}
+				}
+				else // copy
+				{
+					if (pl < patlen - 1)
+					{
+						for (int i = 0; i < 32; i++)
+						{
+							pattern[ndx0][pat_pos + i] = pattern[0][pat_pos + i - 32];
+							pattern[ndx1][pat_pos + i] = pattern[1][pat_pos + i - 32];
+						}
+					}
+					else
+					{
+						for (int i = 0; i < 32 - 8; i++)
+						{
+							pattern[ndx0][pat_pos + i] = pattern[0][pat_pos + i - 32];
+							pattern[ndx1][pat_pos + i] = pattern[1][pat_pos + i - 32];
+						}
+						double tenergy = energy;
+						if (transitions[p])
+							tenergy = energy * energy * energy;
+						else 
+							tenergy = Math.sqrt(Math.sqrt(energy));
+						// design transition
+						for (int i = 32 - 8; i < 32; i++)
+						{
+							double r1 = rand.nextDouble();
+							double r2 = rand.nextDouble();
+						   double r3 = rand.nextDouble(); 
+							if (i % 8 == 0)
+							{
+	   						if (r3 > 0.02)
+	   							pattern[ndx2][pat_pos + i].note_num = hittype3;
+								if (r1 > 0.2)
+									pattern[ndx0][pat_pos + i].note_num = hittype1;
+								if (r2 > 0.5)
+									pattern[ndx1][pat_pos + i].note_num = hittype2;
+							}
+							else if (i % 4 == 0)
+							{
+	   						if (r3 > 0.3 && tenergy > 0.3)
+	   							pattern[ndx2][pat_pos + i].note_num = hittype3;
+								if (r1 > 0.1 && tenergy + r1 > 0.6)
+									pattern[ndx0][pat_pos + i].note_num = hittype1;
+								if (r2 > 0.6 && tenergy > 0.5)
+									pattern[ndx1][pat_pos + i].note_num = hittype2;
+							}
+							else if (i % 2 == 0)
+							{
+								if (tenergy + r1 > 0.9)
+									pattern[ndx0][pat_pos + i].note_num = hittype1;
+							}
+							else
+							{
+								if (tenergy + r1 > 1)
+									pattern[ndx0][pat_pos + i].note_num = hittype1;
+							}
+						}
+					}
+				}
+            for (int i = 0; i < 32; i++)
+            {
+               if (pattern[ndx0][pat_pos + i].note_num > 0)
+                  pattern[ndx0][pat_pos + i].vel = 100;
+               if (pattern[ndx1][pat_pos + i].note_num > 0)
+                  pattern[ndx1][pat_pos + i].vel = 100;
+               if (pattern[ndx2][pat_pos + i].note_num > 0)
+                  pattern[ndx2][pat_pos + i].vel = 100;
+            }
+			}
 		}
 	}
 }
