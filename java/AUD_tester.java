@@ -94,6 +94,16 @@ public class AUD_tester extends JFrame
          aud.reset();
       }
    }
+   private class SaveButtonListener implements ActionListener
+   {
+      AUD aud;
+      public SaveButtonListener(AUD aud) {
+         this.aud = aud;
+      }
+      public void actionPerformed(ActionEvent e) {
+         aud.saveAsMidi();
+      }
+   }
    
    private JTextArea stressArea, energyArea, seedArea;
    private JTextArea patArea, patlenArea;
@@ -163,11 +173,11 @@ public class AUD_tester extends JFrame
       
       this.add(c);
       
-      /*
+      
       JButton save = new JButton("Save as .midi");
-      //save.addActionListener(new ResetButtonListener(aud));
+      save.addActionListener(new SaveButtonListener(aud));
       this.add(save);
-      */   
+         
       pack();
       this.setVisible(true);
       this.setDefaultCloseOperation(EXIT_ON_CLOSE);

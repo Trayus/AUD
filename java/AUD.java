@@ -2,7 +2,7 @@ import java.util.*;
 
 public class AUD 
 {
-   AUD_interface interf;
+   private AUD_interface interf;
    Random rand;
    private boolean has_gen = false;
    private int aud_seed, aud_pat, aud_patlen;
@@ -13,6 +13,11 @@ public class AUD
       interf.start();
       
       AUD_matrices.init();
+   }
+   
+   public void saveAsMidi()
+   {
+      interf.saveMidi("aud");
    }
    
    public void generatePattern(double stress, double energy, int seed, int num_patterns, int repeats)
@@ -52,7 +57,7 @@ public class AUD
 		rand = new Random(aud_seed);
 		
       // pick base note and tempo
-		int base_note = (int)Math.floor(rand.nextDouble() * 11.99) + 24;
+		int base_note = (int)Math.floor(rand.nextDouble() * 11.99) + 30;
 		boolean transitions[] = new boolean[aud_pat];
 		interf.tempo = (int)(150 * (0.9 + rand.nextDouble() * 0.9));
 				
@@ -60,8 +65,8 @@ public class AUD
       int lowInstrs[] = new int[] { 20, 2, 6, 105, 108, 19, 16, 25, 28, 28, 32, 33, 34, 34, 35, 36, 36, 37, 28};
       int highInstrs[] = new int[] { 20, 2, 6, 105, 108, 19, 16, 25, 28, 28, 32, 33, 34, 34, 35, 36, 36, 37, 28, 4, 17, 27};
       
-      //interf.setInstrs(lowInstrs[rand.nextInt(lowInstrs.length)], lowInstrs[rand.nextInt(lowInstrs.length)],
-      //                 highInstrs[rand.nextInt(highInstrs.length)], highInstrs[rand.nextInt(highInstrs.length)]);
+      interf.setInstrs(lowInstrs[rand.nextInt(lowInstrs.length)], lowInstrs[rand.nextInt(lowInstrs.length)],
+                       highInstrs[rand.nextInt(highInstrs.length)], highInstrs[rand.nextInt(highInstrs.length)]);
       
 		for (int i = 0; i < aud_pat; i++)
 		{
@@ -94,17 +99,17 @@ public class AUD
 		rand = new Random(aud_seed);
 		for (int temp = 0; temp < 20; temp++) rand.nextDouble(); // so the two melodic tracks aren't identical
 		n_tracks = (int)Math.floor(2 + energy * n_eng + rand.nextDouble() * n_ran);
-		populate_melody(pattern, stress, energy, aud_pat, aud_patlen, transitions, Jmap, Pmap, base_note + 7, 1, instr_arr, n_tracks, fwd_arr);
+		populate_melody(pattern, stress, energy, aud_pat, aud_patlen, transitions, Jmap, Pmap, base_note, 1, instr_arr, n_tracks, fwd_arr);
 		
 		rand = new Random(aud_seed);
 		for (int temp = 0; temp < 40; temp++) rand.nextDouble(); // so the two melodic tracks aren't identical
 		n_tracks = (int)Math.floor(2 + energy * n_eng + rand.nextDouble() * n_ran);
-		populate_melody(pattern, stress, energy, aud_pat, aud_patlen, transitions, Jmap, Pmap, base_note + 12, 2, instr_arr, n_tracks, fwd_arr);
+		populate_melody(pattern, stress, energy, aud_pat, aud_patlen, transitions, Jmap, Pmap, base_note, 2, instr_arr, n_tracks, fwd_arr);
 		
 		rand = new Random(aud_seed);
 		for (int temp = 0; temp < 80; temp++) rand.nextDouble(); // so the two melodic tracks aren't identical
 		n_tracks = (int)Math.floor(2 + energy * n_eng + rand.nextDouble() * n_ran);
-		populate_melody(pattern, stress, energy, aud_pat, aud_patlen, transitions, Jmap, Pmap, base_note + 19, 3, instr_arr, n_tracks, fwd_arr);
+		populate_melody(pattern, stress, energy, aud_pat, aud_patlen, transitions, Jmap, Pmap, base_note, 3, instr_arr, n_tracks, fwd_arr);
 		
       rand = new Random(aud_seed);
 		for (int temp = 0; temp < 60; temp++) rand.nextDouble(); // so the two melodic tracks aren't identical
@@ -418,6 +423,8 @@ public class AUD
 		return n.get(nt);
 	}
    
+   private boolean extend = true;
+   
    void populate_melody (AUD_note[][] pattern, double stress, double energy, int pat, int patlen, 
                          boolean[] transitions, double[][] Jmap, double[] Pmap, int base_note, int n_instr, 
                          boolean[][] instr_arr, int n_tracks, int[][] fwd_arr)
@@ -527,7 +534,7 @@ public class AUD
 							if (r1 + tenergy > noteplay_fractals[0])
 							{
 								ArrayList<Integer> ntj = getJoiningNotes(pat_pos + i, a, pattern);
-								ArrayList<Integer> n = usableNotes(ntj, Jmap, base_note, joinlimit_fractals[0], false);
+								ArrayList<Integer> n = usableNotes(ntj, Jmap, base_note, joinlimit_fractals[0], extend);
 								pattern[a][pat_pos + i].note_num = pickNoteFromUsable(Pmap, n, r5, base_note, prevalence_fractals[0]);
 								pattern[a][pat_pos + i].vel = 100;
 							}
@@ -538,7 +545,7 @@ public class AUD
 							if (r2 + tenergy > noteplay_fractals[1])
 							{
 								ArrayList<Integer> ntj = getJoiningNotes(pat_pos + i, b, pattern);
-								ArrayList<Integer> n = usableNotes(ntj, Jmap, base_note, joinlimit_fractals[1], true);
+								ArrayList<Integer> n = usableNotes(ntj, Jmap, base_note, joinlimit_fractals[1], extend);
 								pattern[b][pat_pos + i].note_num = pickNoteFromUsable(Pmap, n, r6, base_note, prevalence_fractals[1]);
                         pattern[b][pat_pos + i].vel = 100;
 							}
@@ -549,7 +556,7 @@ public class AUD
 							if (r3 + tenergy > noteplay_fractals[2])
 							{
 								ArrayList<Integer> ntj = getJoiningNotes(pat_pos + i, c, pattern);
-								ArrayList<Integer> n = usableNotes(ntj, Jmap, base_note, joinlimit_fractals[2], true);
+								ArrayList<Integer> n = usableNotes(ntj, Jmap, base_note, joinlimit_fractals[2], extend);
 								pattern[c][pat_pos + i].note_num = pickNoteFromUsable(Pmap, n, r7, base_note, prevalence_fractals[2]);
 							   pattern[c][pat_pos + i].vel = 100;
                      }
@@ -559,7 +566,7 @@ public class AUD
 							if (r4 + tenergy > noteplay_fractals[3])
 							{
 								ArrayList<Integer> ntj = getJoiningNotes(pat_pos + i, d, pattern);
-								ArrayList<Integer> n = usableNotes(ntj, Jmap, base_note, joinlimit_fractals[3], true);
+								ArrayList<Integer> n = usableNotes(ntj, Jmap, base_note, joinlimit_fractals[3], extend);
 								pattern[d][pat_pos + i].note_num = pickNoteFromUsable(Pmap, n, r8, base_note, prevalence_fractals[3]);
                         pattern[d][pat_pos + i].vel = 100;
 							}
@@ -630,28 +637,28 @@ public class AUD
 								if (pattern[a][pat_pos + i].note_num != -1 && r1 < variance - 0.1)
 								{
 									ArrayList<Integer> ntj = getJoiningNotes(pat_pos + i, a, pattern);
-									ArrayList<Integer> n = usableNotes(ntj, Jmap, base_note, 0.10, false);
+									ArrayList<Integer> n = usableNotes(ntj, Jmap, base_note, 0.10, extend);
 									pattern[a][pat_pos + i].note_num = pickNoteFromUsable(Pmap, n, r5, base_note, 0.05);
                            pattern[a][pat_pos + i].vel = 100;
 								}
 								if (pattern[b][pat_pos + i].note_num != -1 && r2 < variance)
 								{
 									ArrayList<Integer> ntj = getJoiningNotes(pat_pos + i, b, pattern);
-									ArrayList<Integer> n = usableNotes(ntj, Jmap, base_note, 0.08, false);
+									ArrayList<Integer> n = usableNotes(ntj, Jmap, base_note, 0.08, extend);
 									pattern[b][pat_pos + i].note_num = pickNoteFromUsable(Pmap, n, r6, base_note, 0.04);
                            pattern[b][pat_pos + i].vel = 100;
 								}
 								if (pattern[c][pat_pos + i].note_num != -1 && r3 < variance + 0.1)
 								{
 									ArrayList<Integer> ntj = getJoiningNotes(pat_pos + i, c, pattern);
-									ArrayList<Integer> n = usableNotes(ntj, Jmap, base_note, 0.05, false);
+									ArrayList<Integer> n = usableNotes(ntj, Jmap, base_note, 0.05, extend);
 									pattern[c][pat_pos + i].note_num = pickNoteFromUsable(Pmap, n, r7, base_note, 0.02);
                            pattern[c][pat_pos + i].vel = 100;
 								}
 								if (pattern[d][pat_pos + i].note_num != -1 && r4 < variance + 0.2)
 								{
 									ArrayList<Integer> ntj = getJoiningNotes(pat_pos + i, d, pattern);
-									ArrayList<Integer> n = usableNotes(ntj, Jmap, base_note, 0.03, false);
+									ArrayList<Integer> n = usableNotes(ntj, Jmap, base_note, 0.03, extend);
 									pattern[d][pat_pos + i].note_num = pickNoteFromUsable(Pmap, n, r8, base_note, 0.02);
                            pattern[d][pat_pos + i].vel = 100;
 								}
@@ -741,7 +748,7 @@ public class AUD
 								if (r1 + tenergy > 0.1)
 								{
 									ArrayList<Integer> ntj = getJoiningNotes(pat_pos + i, a, pattern);
-									ArrayList<Integer> n = usableNotes(ntj, Jmap, base_note, 0.12, false);
+									ArrayList<Integer> n = usableNotes(ntj, Jmap, base_note, 0.12, extend);
 									pattern[a][pat_pos + i].note_num = pickNoteFromUsable(Pmap, n, r5, base_note, 0.06);
                            pattern[a][pat_pos + i].vel = 100;                  
 								}
@@ -751,7 +758,7 @@ public class AUD
 								if (r2 + tenergy > 0.4)
 								{
 									ArrayList<Integer> ntj = getJoiningNotes(pat_pos + i, b, pattern);
-									ArrayList<Integer> n = usableNotes(ntj, Jmap, base_note, 0.09, true);
+									ArrayList<Integer> n = usableNotes(ntj, Jmap, base_note, 0.09, extend);
 									pattern[b][pat_pos + i].note_num = pickNoteFromUsable(Pmap, n, r6, base_note, 0.03);
                            pattern[b][pat_pos + i].vel = 100;
 								}
@@ -761,7 +768,7 @@ public class AUD
 								if (r3 + tenergy > 0.6)
 								{
 									ArrayList<Integer> ntj = getJoiningNotes(pat_pos + i, c, pattern);
-									ArrayList<Integer> n = usableNotes(ntj, Jmap, base_note, 0.05, true);
+									ArrayList<Integer> n = usableNotes(ntj, Jmap, base_note, 0.05, extend);
 									pattern[c][pat_pos + i].note_num = pickNoteFromUsable(Pmap, n, r7, base_note, 0.02);
                            pattern[c][pat_pos + i].vel = 100;
 								}
@@ -771,7 +778,7 @@ public class AUD
 								if (r4 + tenergy > 0.9)
 								{
 									ArrayList<Integer> ntj = getJoiningNotes(pat_pos + i, d, pattern);
-									ArrayList<Integer> n = usableNotes(ntj, Jmap, base_note, 0.03, true);
+									ArrayList<Integer> n = usableNotes(ntj, Jmap, base_note, 0.03, extend);
 									pattern[d][pat_pos + i].note_num = pickNoteFromUsable(Pmap, n, r8, base_note, 0.02);
                            pattern[d][pat_pos + i].vel = 100;
 								}
