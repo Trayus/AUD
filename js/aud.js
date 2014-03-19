@@ -2,10 +2,23 @@
 const BUFFER_SIZE = 4096;
 const NUM_OUTPUTS = 2;
 const NUM_INPUTS = 0; 
+
+var _browserType = navigator.userAgent ;
+console.log("Browser Type = " + _browserType);
 		
-var audio_context = new webkitAudioContext();
+var audio_context;
+if (_browserType.indexOf("Chrome") != -1)
+	audio_context = new webkitAudioContext();
+else
+	audio_context = new AudioContext();
+	
 var sampleRate = this.audio_context.sampleRate;
-var node = this.audio_context.createJavaScriptNode(BUFFER_SIZE, NUM_INPUTS, NUM_OUTPUTS);
+
+var node;
+if (_browserType.indexOf("Chrome") != -1)
+	node = this.audio_context.createJavaScriptNode(BUFFER_SIZE, NUM_INPUTS, NUM_OUTPUTS);
+else
+	node = this.audio_context.createScriptProcessor(BUFFER_SIZE, NUM_INPUTS, NUM_OUTPUTS);
 
 var aud_waves = new function(){
 	this.Saw = 0;
@@ -24,7 +37,11 @@ var aud_interface = function()
 	
 	this.paused = true;
 	
-	this.gainNode = audio_context.createGainNode();
+	this.gainNode;
+	if (_browserType.indexOf("Chrome") != -1)
+		this.gainNode = audio_context.createGainNode();
+	else
+		this.gainNode = audio_context.createGain();
     this.gainNode.gain.value = 1;
     node.connect(this.gainNode);
     this.gainNode.connect(audio_context.destination);	
